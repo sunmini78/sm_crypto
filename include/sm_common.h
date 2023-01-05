@@ -13,7 +13,7 @@ extern "C" {
 typedef struct
 {
     uint8_t* ptr;
-    uint32_t size;
+    size_t size;
 } Buffer;
 
 void printLastError(char *msg);

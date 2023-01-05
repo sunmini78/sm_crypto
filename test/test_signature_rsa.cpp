@@ -56,7 +56,7 @@ TEST_F(SignatureRsaTest, RSA_PKCS)
 	ASSERT_EQ(result, true);
 }
 
-TEST_F(SignatureRsaTest, RSA_PKCS_KEY_FIX)
+TEST_F(SignatureRsaTest, RSA_PKCS_FIXED_KEY)
 {
 	bool result = false;
 
@@ -144,7 +144,7 @@ TEST_F(SignatureRsaTest, RSA_PSS)
 	ASSERT_EQ(result, true);
 }
 
-TEST_F(SignatureRsaTest, RSA_PSS_KEY_FIX)
+TEST_F(SignatureRsaTest, RSA_PSS_FIXED_KEY)
 {
 	bool result = false;
 

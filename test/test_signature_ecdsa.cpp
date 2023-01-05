@@ -54,7 +54,7 @@ TEST_F(SignatureEccTest, ECDSA_SECP256_R1)
 }
 
 
-TEST_F(SignatureEccTest, ECDSA_SECP256_R1_KEY_FIX)
+TEST_F(SignatureEccTest, ECDSA_SECP256_R1_FIXED_KEY)
 {
 	bool result = false;
 	uint8_t pri_key[TEST_ECDSA_PRIVATE_KEY_SIZE] = {
