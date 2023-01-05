@@ -4,6 +4,7 @@
 #include "sm_asymmetric_encryption.h"
 #include "sm_digest.h"
 #include "sm_rng.h"
+#include "sm_asymmetric_key.h"
 #include "sm_common.h"
 
 #define TEST_RSA_KEY_SIZE (256u)

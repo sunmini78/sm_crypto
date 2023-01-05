@@ -4,6 +4,7 @@
 #include "sm_signature.h"
 #include "sm_digest.h"
 #include "sm_rng.h"
+#include "sm_asymmetric_key.h"
 #include "sm_common.h"
 
 #define TEST_ECDSA_PRIVATE_KEY_SIZE (32u)

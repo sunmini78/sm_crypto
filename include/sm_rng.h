@@ -12,9 +12,6 @@ extern "C" {
 
 bool generate_random(Buffer *rng);
 
-bool generate_rsa_key(const uint32_t key_bits, Buffer *pri_e, Buffer *mod_n, Buffer *pub_e);
-bool generate_ecdsa_key(Buffer *pri_key, Buffer *pub_key);
-
 # ifdef __cplusplus
 }
 # endif
