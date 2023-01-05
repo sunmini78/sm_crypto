@@ -16,7 +16,10 @@ extern "C" {
 #define DIGEST_SHA384_SIZE (48u)
 #define DIGEST_SHA512_SIZE (64u)
 
-bool generate_sha(const Buffer *src, uint8_t *digest, uint32_t digest_size);
+bool generate_sha(const Buffer *src, Buffer *digest);
+
+bool generate_hmac(const Buffer *key, const Buffer *src, Buffer *mac);
+bool generate_cmac(const Buffer *key, const Buffer *src, Buffer *mac);
 
 # ifdef __cplusplus
 }

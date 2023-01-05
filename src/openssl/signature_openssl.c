@@ -162,7 +162,7 @@ uint32_t rsa_pkcs1_sign(const Buffer *pri_key, const Buffer *pub_key, const Buff
 	RSA* rsa = convertRSAPrivateKey(pri_key, modN, pub_key);
 	uint8_t digest[DIGEST_SHA512_SIZE] = {0};
 	Buffer buf_digest = {.ptr = digest, .size = digest_size};
-	generate_sha(message, digest, digest_size);
+	generate_sha(message, &buf_digest);
 
 	uint32_t result = openssl_rsa_sign(rsa, get_sha_method(digest_size), RSA_PKCS1_PADDING, &buf_digest, sig);
 	RSA_free(rsa);
@@ -176,8 +176,8 @@ uint32_t rsa_pkcs1_verify(const Buffer *pub_key, const Buffer *modN, const Buffe
     RSA* rsa = convertRSAPublicKey(pub_key, modN);
     uint8_t digest[DIGEST_SHA512_SIZE] = {0};
     Buffer buf_digest = {.ptr = digest, .size = digest_size};
-    generate_sha(message, digest, digest_size);
-    uint32_t result = openssl_rsa_verify(rsa, get_sha_method(digest_size), RSA_PKCS1_PADDING, &buf_digest, sig);
+	generate_sha(message, &buf_digest);
+	uint32_t result = openssl_rsa_verify(rsa, get_sha_method(digest_size), RSA_PKCS1_PADDING, &buf_digest, sig);
     RSA_free(rsa);
 
     return result;
@@ -189,7 +189,7 @@ uint32_t rsa_pss_sign(const Buffer *pri_key, const Buffer *pub_key, const Buffer
 	uint8_t digest[SHA_MAX_SIZE] = {0};
 	Buffer buf_digest = {.ptr = digest, .size = digest_size};
 
-	generate_sha(message, digest, digest_size);
+	generate_sha(message, &buf_digest);
 
 	uint32_t result = openssl_rsa_sign(rsa, get_sha_method(digest_size), RSA_PKCS1_PSS_PADDING, &buf_digest, sig);
 
@@ -203,38 +203,13 @@ uint32_t rsa_pss_verify(const Buffer *pub_key, const Buffer *modN, const Buffer 
     RSA* rsa = convertRSAPublicKey(pub_key, modN);
     uint8_t digest[DIGEST_SHA512_SIZE] = {0};
     Buffer buf_digest = {.ptr = digest, .size = digest_size};
-    generate_sha(message, digest, digest_size);
+	generate_sha(message, &buf_digest);
 
-    uint32_t result = openssl_rsa_verify(rsa, get_sha_method(digest_size), RSA_PKCS1_PSS_PADDING, &buf_digest, sig);
+	uint32_t result = openssl_rsa_verify(rsa, get_sha_method(digest_size), RSA_PKCS1_PSS_PADDING, &buf_digest, sig);
     RSA_free(rsa);
 
     return result;
 }
-
-// static EC_KEY* key_regenerate(const BIGNUM *bn)
-// {
-// 	EC_KEY* key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
-// 	const EC_GROUP* grp = EC_KEY_get0_group(key);
-// 	BN_CTX* ctx = BN_CTX_new();
-
-// 	EC_POINT* pub_key = EC_POINT_new(grp);
-// 	EC_POINT_mul(grp, pub_key, bn, NULL, NULL, ctx);
-
-// 	EC_KEY_set_public_key(key, pub_key);
-// 	EC_KEY_set_private_key(key, bn);
-
-// 	EC_POINT_free(pub_key);
-// 	BN_CTX_free(ctx);
-
-// 	if(EC_KEY_check_key(key) <= 0)
-// 	{
-// 		printLastError("openssl_ecdsa_sign EC_KEY_check_key faield");
-// 		EC_KEY_free(key);
-// 		key = NULL;
-// 	}
-
-// 	return key;
-// }
 
 static EC_KEY* convert_private_ec_key(const Buffer *key)
 {
@@ -268,7 +243,8 @@ uint32_t ecdsa_sign(const Buffer *key, const Buffer *message, uint32_t digest_si
 	uint32_t result = 0;
 	EC_KEY* ec_key = convert_private_ec_key(key);
 	uint8_t digest[SHA_MAX_SIZE] = {0};
-	generate_sha(message, digest, digest_size);
+	Buffer buf_digest = {.ptr = digest, .size = digest_size};
+	generate_sha(message, &buf_digest);
 
 	ECDSA_SIG* ec_sig = ECDSA_do_sign(digest, digest_size, ec_key);
 
@@ -309,7 +285,8 @@ uint32_t ecdsa_verify(const Buffer *key, const Buffer *message, uint32_t digest_
 	EC_KEY* ec_key = convert_public_ec_key(key);
 
 	uint8_t digest[SHA_MAX_SIZE] = {0};
-	generate_sha(message, digest, digest_size);
+	Buffer buf_digest = {.ptr = digest, .size = digest_size};
+	generate_sha(message, &buf_digest);
 
 	ECDSA_SIG* ec_sig = ECDSA_SIG_new();
 	BIGNUM* sig_r = BN_bin2bn(sig->ptr, EC_POINT_SIZE, NULL);
