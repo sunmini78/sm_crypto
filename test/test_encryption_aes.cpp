@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <array>
 
+#include "sm_symmetric_key.h"
 #include "sm_symmetric_encryption.h"
 #include "sm_rng.h"
 
@@ -13,7 +14,7 @@ protected:
 
 	void SetUp() override
 	{
-		generate_random(&bkey);
+		generate_blcok_cipher_key(&bkey);
 		print_hex("AES KEY", bkey.ptr, bkey.size);
 
 		generate_random(&biv);
@@ -26,7 +27,7 @@ protected:
 	{
 	}
 
-	std::array<uint8_t, 16> key = {0x00};
+	std::array<uint8_t, 32> key = {0x00};
 	Buffer bkey = {.ptr = key.data(), .size = key.size()};
 
 	std::array<uint8_t, 16> iv = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e};
