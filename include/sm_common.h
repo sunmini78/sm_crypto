@@ -16,7 +16,9 @@ typedef struct
     size_t size;
 } Buffer;
 
-void printLastError(char *msg);
+// for openssl
+void print_last_error(const char *msg);
+
 void print_hex(const char* name, const uint8_t* data, size_t data_size);
 
 # ifdef __cplusplus

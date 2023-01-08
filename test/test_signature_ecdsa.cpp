@@ -9,7 +9,7 @@
 
 #define TEST_ECDSA_PRIVATE_KEY_SIZE (32u)
 #define TEST_ECDSA_PUBLIC_KEY_SIZE (64u)
-#define TEST_SIGNATURE_SIZE (64u)
+#define TEST_SIGNATURE_SIZE (72u)
 
 class SignatureEccTest : public testing::Test
 {
@@ -39,7 +39,8 @@ TEST_F(SignatureEccTest, ECDSA_SECP256_R1)
 	Buffer buf_pri = {.ptr = pri_key, .size = sizeof(pri_key)};
     Buffer buf_pub = {.ptr = pub_key, .size = sizeof(pub_key)};
 
-	generate_ecdsa_key(&buf_pri, &buf_pub);
+	result = generate_ec_key(&buf_pri, &buf_pub);
+	ASSERT_EQ(result, true);
 
 	uint8_t signature[TEST_SIGNATURE_SIZE] = {0};
     Buffer buf_sig = {.ptr = signature, .size = sizeof(signature)};
@@ -47,10 +48,7 @@ TEST_F(SignatureEccTest, ECDSA_SECP256_R1)
 	ecdsa_sign(&buf_pri, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	print_hex("ECDSA secp256r1 SIGNATURE", buf_sig.ptr, buf_sig.size);
 
-	if(ecdsa_verify(&buf_pub, &message, DIGEST_SHA256_SIZE, &buf_sig) == 0)
-	{
-		result = true;
-	}
+	result = ecdsa_verify(&buf_pub, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	ASSERT_EQ(result, true);
 }
 
@@ -79,9 +77,6 @@ TEST_F(SignatureEccTest, ECDSA_SECP256_R1_FIXED_KEY)
 	ecdsa_sign(&buf_pri, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	print_hex("ECDSA secp256r1 SIGNATURE", buf_sig.ptr, buf_sig.size);
 
-	if(ecdsa_verify(&buf_pub, &message, DIGEST_SHA256_SIZE, &buf_sig) == 0)
-	{
-		result = true;
-	}
+	result = ecdsa_verify(&buf_pub, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	ASSERT_EQ(result, true);
 }

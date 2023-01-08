@@ -172,7 +172,7 @@ bool aes_ccm_encrypt(const Buffer *key, const Buffer* nonce, const Buffer *aad, 
 	return true;
 }
 
-bool aes_ccm_decrypt(const Buffer *key, const Buffer* nonce, const Buffer *aad, Buffer* tag, const Buffer *cipher, Buffer *plain)
+bool aes_ccm_decrypt(const Buffer *key, const Buffer* nonce, const Buffer *aad, const Buffer* tag, const Buffer *cipher, Buffer *plain)
 {
 	const EVP_CIPHER* evp_cipher = get_aes_ccm_cipher_by_key_size(key->size);
 	if(evp_cipher == NULL)
@@ -246,7 +246,7 @@ bool aes_gcm_encrypt(const Buffer *key, const Buffer* iv, const Buffer *aad, con
 	return true;
 }
 
-bool aes_gcm_decrypt(const Buffer* key, const Buffer* iv, const Buffer *aad, Buffer* tag, const Buffer *cipher, Buffer *plain)
+bool aes_gcm_decrypt(const Buffer* key, const Buffer* iv, const Buffer *aad, const Buffer* tag, const Buffer *cipher, Buffer *plain)
 {
 	const EVP_CIPHER* evp_cipher = get_aes_gcm_cipher_by_key_size(key->size);
 	if(evp_cipher == NULL)

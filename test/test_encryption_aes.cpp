@@ -46,7 +46,6 @@ protected:
 TEST_F(EncryptionAesTest, CBC)
 {
 	bool result = true;
-
 	result = aes_cbc_encrypt(&bkey, &biv, &bplain, &bcipher);
 	ASSERT_EQ(result, true);
 	print_hex("AES CBC ENC", bcipher.ptr, bcipher.size);
@@ -62,7 +61,6 @@ TEST_F(EncryptionAesTest, CBC)
 TEST_F(EncryptionAesTest, CTR)
 {
 	bool result = true;
-
 	result = aes_ctr_encrypt(&bkey, &biv, 0xffffffff, NIST_SP800_39A_COUNTER_BLOCK, &bplain, &bcipher);
 	ASSERT_EQ(result, true);
 	print_hex("AES CTR ENC", bcipher.ptr, bcipher.size);

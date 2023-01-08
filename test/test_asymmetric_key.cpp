@@ -115,7 +115,7 @@ TEST_F(AsymmetricKeyTest, ECDSA_secp256r1)
 	Buffer buf_pri = {.ptr = pri_key.data(), .size = pri_key.size()};
     Buffer buf_pub = {.ptr = pub_key.data(), .size = pub_key.size()};
 
-	bool result = generate_ecdsa_cert(&buf_pri, &buf_pub);
+	bool result = generate_ec_cert(&buf_pri, &buf_pub);
 	ASSERT_EQ(result, true);
 	printf("ECC Private Key \n%s\n", buf_pri.ptr);
 	printf("ECC Public Key \n%s\n", buf_pub.ptr);
@@ -129,7 +129,7 @@ TEST_F(AsymmetricKeyTest, ECDSA_export_key)
 	Buffer buf_pri_cert = {.ptr = pri_cert.data(), .size = pri_cert.size()};
     Buffer buf_pub_cert = {.ptr = pub_cert.data(), .size = pub_cert.size()};
 
-	bool result = generate_ecdsa_cert(&buf_pri_cert, &buf_pub_cert);
+	bool result = generate_ec_cert(&buf_pri_cert, &buf_pub_cert);
 
 	uint8_t pri_key[TEST_ECDSA_PRIVATE_KEY_SIZE] = { 0 };
     uint8_t pub_key[TEST_ECDSA_PUBLIC_KEY_SIZE] = { 0 };
@@ -137,8 +137,8 @@ TEST_F(AsymmetricKeyTest, ECDSA_export_key)
 	Buffer buf_pri = {.ptr = pri_key, .size = sizeof(pri_key)};
     Buffer buf_pub = {.ptr = pub_key, .size = sizeof(pub_key)};
 
-	export_ecc_private_key_from_cert(&buf_pri_cert, &buf_pri);
-	export_ecc_public_key_from_cert(&buf_pub_cert, &buf_pub);
+	export_ec_private_key_from_cert(&buf_pri_cert, &buf_pri);
+	export_ec_public_key_from_cert(&buf_pub_cert, &buf_pub);
 
 	print_hex("ECC Private Key", buf_pri.ptr, buf_pri.size);
 	print_hex("ECC Public Key", buf_pub.ptr, buf_pub.size);

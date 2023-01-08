@@ -30,13 +30,13 @@ bool aes_ctr_decrypt(const Buffer *key, const Buffer* iv, uint32_t counter, uint
 // AAD 128(16)
 // TAG 32(4) ~ 128(16)
 bool aes_ccm_encrypt(const Buffer *key, const Buffer* nonce, const Buffer *aad, const Buffer *plain, Buffer *cipher, Buffer* tag);
-bool aes_ccm_decrypt(const Buffer *key, const Buffer* nonce, const Buffer *aad, Buffer* tag, const Buffer *cipher, Buffer *plain);
+bool aes_ccm_decrypt(const Buffer *key, const Buffer* nonce, const Buffer *aad, const Buffer* tag, const Buffer *cipher, Buffer *plain);
 
 // IV 96(12)
 // AAD 128(16)
 // TAG 128(16)
 bool aes_gcm_encrypt(const Buffer *key, const Buffer* iv, const Buffer *aad, const Buffer* plain, Buffer* cipher, Buffer* tag);
-bool aes_gcm_decrypt(const Buffer *key, const Buffer* iv, const Buffer *aad, Buffer* tag, const Buffer* cipher, Buffer* plain);
+bool aes_gcm_decrypt(const Buffer *key, const Buffer* iv, const Buffer *aad, const Buffer* tag, const Buffer* cipher, Buffer* plain);
 
 # ifdef __cplusplus
 }

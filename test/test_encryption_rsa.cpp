@@ -39,7 +39,7 @@ protected:
     Buffer buf_pub = {.ptr = pub_e.data(), .size = pub_e.size()};
     Buffer buf_mod = {.ptr = mod_n.data(), .size = mod_n.size()};
 
-	std::array<uint8_t, 214> buf = {0}; // RSA 2048
+	std::array<uint8_t, 190> buf = {0}; // RSA 2048
 	// std::array<uint8_t, 86> buf = {0}; // RSA 1024
 	Buffer buf_message = {.ptr = buf.data(), .size = buf.size()};
 

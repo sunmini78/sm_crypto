@@ -1,15 +1,14 @@
 
-#include <openssl/err.h>
-#include <stdio.h>
+#include "sm_common.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "mbedtls/cipher.h"
 
 void print_last_error(const char *msg)
 {
-	char *err = malloc(130);
-	ERR_load_crypto_strings();
-	ERR_error_string(ERR_get_error(), err);
-	printf("%s ERROR: %s\n", msg, err);
-	free(err);
+	printf("print_last_error not support\n");
 }
 
 void print_hex(const char* name, const uint8_t* data, size_t data_size)

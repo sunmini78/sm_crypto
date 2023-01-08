@@ -8,8 +8,6 @@
 
 // #include "sm_rng.h"
 
-#define EC_POINT_SIZE (32u)
-
 static RSA* generate_rsa(const uint32_t key_bits)
 {
 	BIGNUM* exp = BN_new();
@@ -116,7 +114,7 @@ bool generate_rsa_cert(uint32_t key_bits, Buffer *pri_cert, Buffer *pub_cert)
 	return true;
 }
 
-bool generate_ecdsa_cert(Buffer *pri_cert, Buffer *pub_cert)
+bool generate_ec_cert(Buffer *pri_cert, Buffer *pub_cert)
 {
 	EC_KEY* ec_key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
 	/* -------------------------------------------------------- *
@@ -151,7 +149,7 @@ bool generate_ecdsa_cert(Buffer *pri_cert, Buffer *pub_cert)
 	return true;
 }
 
-static bool get_ecdsa_public_key(EC_KEY* ec_key, Buffer *pub_key)
+static bool get_ec_public_key(EC_KEY* ec_key, Buffer *pub_key)
 {
 	BN_CTX* ctx = BN_CTX_new();
 	const EC_GROUP *group = EC_KEY_get0_group(ec_key);
@@ -169,7 +167,7 @@ static bool get_ecdsa_public_key(EC_KEY* ec_key, Buffer *pub_key)
 	return true;
 }
 
-bool generate_ecdsa_key(Buffer *pri_key, Buffer *pub_key)
+bool generate_ec_key(Buffer *pri_key, Buffer *pub_key)
 {
 	bool result = true;
 
@@ -188,14 +186,14 @@ bool generate_ecdsa_key(Buffer *pri_key, Buffer *pub_key)
 		const BIGNUM* private_key = EC_KEY_get0_private_key(ec_key);
 		BN_bn2bin(private_key, pri_key->ptr);
 
-		get_ecdsa_public_key(ec_key, pub_key);
+		get_ec_public_key(ec_key, pub_key);
 	}
 
 	EC_KEY_free(ec_key);
     return result;
 }
 
-bool export_ecc_private_key_from_cert(const Buffer *cert, Buffer* key)
+bool export_ec_private_key_from_cert(const Buffer *cert, Buffer* key)
 {
 	EC_KEY* ec_key = NULL;
 	BIO *bio = BIO_new_mem_buf(cert->ptr, cert->size);
@@ -208,14 +206,14 @@ bool export_ecc_private_key_from_cert(const Buffer *cert, Buffer* key)
 	return true;
 }
 
-bool export_ecc_public_key_from_cert(const Buffer *cert, Buffer* key)
+bool export_ec_public_key_from_cert(const Buffer *cert, Buffer* key)
 {
 	EC_KEY* ec_key = NULL;
 
 	BIO *bio = BIO_new_mem_buf(cert->ptr, cert->size);
 	ec_key = PEM_read_bio_EC_PUBKEY(bio, NULL, NULL, NULL);
 
-	get_ecdsa_public_key(ec_key, key);
+	get_ec_public_key(ec_key, key);
 
 	BIO_free(bio);
 

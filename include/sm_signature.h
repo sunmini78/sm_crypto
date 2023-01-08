@@ -11,14 +11,14 @@ extern "C" {
 
 #include "sm_common.h"
 
-uint32_t rsa_pkcs1_sign(const Buffer *pri_key, const Buffer *pub_key, const Buffer *modN, const Buffer *message, uint32_t digest_size, Buffer *sig);
-uint32_t rsa_pkcs1_verify(const Buffer *pub_key, const Buffer *modN, const Buffer *message, uint32_t digest_size, Buffer *sig);
+bool rsa_pkcs1_sign(const Buffer *pri_e, const Buffer *pub_e, const Buffer *mod_n, const Buffer *message, uint32_t digest_size, Buffer *sig);
+bool rsa_pkcs1_verify(const Buffer *pub_e, const Buffer *mod_n, const Buffer *message, uint32_t digest_size, const Buffer *sig);
 
-uint32_t rsa_pss_sign(const Buffer *pri_key, const Buffer *pub_key, const Buffer *modN, const Buffer *message, uint32_t digest_size, Buffer *sig);
-uint32_t rsa_pss_verify(const Buffer *pub_key, const Buffer *modN, const Buffer *message, uint32_t digest_size, Buffer *sig);
+bool rsa_pss_sign(const Buffer *pri_e, const Buffer *pub_e, const Buffer *mod_n, const Buffer *message, uint32_t digest_size, Buffer *sig);
+bool rsa_pss_verify(const Buffer *pub_e, const Buffer *mod_n, const Buffer *message, uint32_t digest_size, const Buffer *sig);
 
-uint32_t ecdsa_sign(const Buffer *key, const Buffer *message, uint32_t digest_size, Buffer *sig);
-uint32_t ecdsa_verify(const Buffer *key, const Buffer *message, uint32_t digest_size, Buffer *sig);
+bool ecdsa_sign(const Buffer *key, const Buffer *message, uint32_t digest_size, Buffer *sig);
+bool ecdsa_verify(const Buffer *key, const Buffer *message, uint32_t digest_size, const Buffer *sig);
 
 # ifdef __cplusplus
 }

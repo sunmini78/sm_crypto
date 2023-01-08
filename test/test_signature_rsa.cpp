@@ -49,11 +49,7 @@ TEST_F(SignatureRsaTest, RSA_PKCS)
 	rsa_pkcs1_sign(&buf_pri, &buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	print_hex("RSA PKCS#1 SIGNATURE", buf_sig.ptr, buf_sig.size);
 
-	if(rsa_pkcs1_verify(&buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig) == 0)
-	{
-		result = true;
-	}
-
+	result = rsa_pkcs1_verify(&buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	ASSERT_EQ(result, true);
 }
 
@@ -110,11 +106,7 @@ TEST_F(SignatureRsaTest, RSA_PKCS_FIXED_KEY)
 	rsa_pkcs1_sign(&buf_pri, &buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	print_hex("RSA PKCS#1 SIGNATURE", buf_sig.ptr, buf_sig.size);
 
-	if(rsa_pkcs1_verify(&buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig) == 0)
-	{
-		result = true;
-	}
-
+	result = rsa_pkcs1_verify(&buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	ASSERT_EQ(result, true);
 }
 
@@ -137,11 +129,7 @@ TEST_F(SignatureRsaTest, RSA_PSS)
 	rsa_pss_sign(&buf_pri, &buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	print_hex("RSA PSS SIGNATURE", buf_sig.ptr, buf_sig.size);
 
-	if(rsa_pss_verify(&buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig) == 0)
-	{
-		result = true;
-	}
-
+	result = rsa_pss_verify(&buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	ASSERT_EQ(result, true);
 }
 
@@ -198,10 +186,6 @@ TEST_F(SignatureRsaTest, RSA_PSS_FIXED_KEY)
 	rsa_pss_sign(&buf_pri, &buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	print_hex("RSA PSS SIGNATURE", buf_sig.ptr, buf_sig.size);
 
-	if(rsa_pss_verify(&buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig) == 0)
-	{
-		result = true;
-	}
-
+	result = rsa_pss_verify(&buf_pub, &buf_mod, &message, DIGEST_SHA256_SIZE, &buf_sig);
 	ASSERT_EQ(result, true);
 }
