@@ -103,12 +103,22 @@ bool rsa_pss_verify(const Buffer *pub_e, const Buffer *mod_n, const Buffer *mess
 
 bool ecdsa_sign(const Buffer *key, const Buffer *message, uint32_t digest_size, Buffer *sig)
 {
-	mbedtls_pk_context ctx;
-	mbedtls_pk_init(&ctx);
+	mbedtls_ecp_group grp;
+	mbedtls_mpi d, r, s;
 
-	mbedtls_pk_setup(&ctx, mbedtls_pk_info_from_type(MBEDTLS_PK_ECDSA));
-	mbedtls_ecp_group_load(&mbedtls_pk_ec(ctx)->MBEDTLS_PRIVATE(grp), MBEDTLS_ECP_DP_SECP256R1);
-	mbedtls_mpi_read_binary(&mbedtls_pk_ec(ctx)->MBEDTLS_PRIVATE(d), key->ptr, key->size);
+	mbedtls_ecp_group_init(&grp);
+	mbedtls_ecp_group_load(&grp, MBEDTLS_ECP_DP_SECP256R1);
+
+	mbedtls_mpi_init(&d);
+	mbedtls_mpi_init(&r);
+	mbedtls_mpi_init(&s);
+
+	mbedtls_mpi_read_binary(&d, key->ptr, key->size);
+
+	uint8_t digest[DIGEST_SHA512_SIZE] = {0};
+	Buffer buf_digest = {.ptr = digest, .size = digest_size};
+	generate_sha(message, &buf_digest);
+
 	mbedtls_ctr_drbg_context ctr_drbg;
 	mbedtls_ctr_drbg_init(&ctr_drbg);
 
@@ -116,44 +126,55 @@ bool ecdsa_sign(const Buffer *key, const Buffer *message, uint32_t digest_size, 
 	mbedtls_entropy_init(&entropy);
 	const char *pers = "ecdsa_pk_sign";
 
-	mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *) pers, strlen(pers));
+	mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *)pers, strlen(pers));
 
-	uint8_t digest[DIGEST_SHA512_SIZE] = {0};
-	Buffer buf_digest = {.ptr = digest, .size = digest_size};
-	generate_sha(message, &buf_digest);
+	int ret = mbedtls_ecdsa_sign(&grp, &r, &s, &d, buf_digest.ptr, buf_digest.size, mbedtls_ctr_drbg_random, &ctr_drbg);
+	if(ret == 0)
+	{
+		mbedtls_mpi_write_binary(&r, sig->ptr, EC_POINT_SIZE);
+		mbedtls_mpi_write_binary(&s, &sig->ptr[EC_POINT_SIZE], EC_POINT_SIZE);
+	}
 
-	int ret = mbedtls_pk_sign(&ctx, MBEDTLS_MD_SHA256, buf_digest.ptr, buf_digest.size, sig->ptr, sig->size, &sig->size, mbedtls_ctr_drbg_random, &ctr_drbg);
-
-	mbedtls_ctr_drbg_free(&ctr_drbg);
-	mbedtls_entropy_free(&entropy);
-	mbedtls_pk_free(&ctx);
+	mbedtls_mpi_free(&d);
+	mbedtls_mpi_free(&r);
+	mbedtls_mpi_free(&s);
+	mbedtls_ecp_group_free(&grp);
 
 	return ret == 0 ? true : false;
 }
 
 bool ecdsa_verify(const Buffer *key, const Buffer *message, uint32_t digest_size, const Buffer *sig)
 {
-	mbedtls_pk_context ctx;
-	mbedtls_pk_init(&ctx);
+	mbedtls_ecp_group grp;
+	mbedtls_ecp_point Q;
+	mbedtls_mpi r, s;
 
-	mbedtls_pk_setup(&ctx, mbedtls_pk_info_from_type(MBEDTLS_PK_ECDSA));
-	mbedtls_ecp_keypair* keypair = mbedtls_pk_ec(ctx);
+	mbedtls_ecp_group_init(&grp);
+	mbedtls_ecp_group_load(&grp, MBEDTLS_ECP_DP_SECP256R1);
 
-	mbedtls_ecp_group_load(&keypair->MBEDTLS_PRIVATE(grp), MBEDTLS_ECP_DP_SECP256R1);
-	mbedtls_mpi_read_binary(&keypair->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(X), key->ptr, EC_POINT_SIZE);
-	mbedtls_mpi_read_binary(&keypair->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Y), &key->ptr[EC_POINT_SIZE], EC_POINT_SIZE);
+	mbedtls_ecp_point_init(&Q);
+
+	mbedtls_mpi_read_binary(&Q.MBEDTLS_PRIVATE(X), key->ptr, EC_POINT_SIZE);
+	mbedtls_mpi_read_binary(&Q.MBEDTLS_PRIVATE(Y), &key->ptr[EC_POINT_SIZE], EC_POINT_SIZE);
 	uint8_t point_z = 0x01;
-	mbedtls_mpi_read_binary(&keypair->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Z), &point_z, 1);
+	mbedtls_mpi_read_binary(&Q.MBEDTLS_PRIVATE(Z), &point_z, 1);
 
-	mbedtls_ecp_check_pubkey(&keypair->MBEDTLS_PRIVATE(grp), &mbedtls_pk_ec(ctx)->MBEDTLS_PRIVATE(Q));
+	mbedtls_mpi_init(&r);
+	mbedtls_mpi_init(&s);
+	mbedtls_mpi_read_binary(&r, sig->ptr, EC_POINT_SIZE);
+	mbedtls_mpi_read_binary(&s, &sig->ptr[EC_POINT_SIZE], EC_POINT_SIZE);
 
 	uint8_t digest[DIGEST_SHA512_SIZE] = {0};
 	Buffer buf_digest = {.ptr = digest, .size = digest_size};
 	generate_sha(message, &buf_digest);
 
-	int ret = mbedtls_pk_verify(&ctx, MBEDTLS_MD_SHA256, buf_digest.ptr, buf_digest.size, sig->ptr, sig->size );
+	int ret = mbedtls_ecdsa_verify(&grp, buf_digest.ptr, buf_digest.size , &Q, & r, &s);
 
-	mbedtls_pk_free(&ctx);
+	mbedtls_mpi_free(&r);
+	mbedtls_mpi_free(&s);
+	mbedtls_ecp_point_free(&Q);
+	mbedtls_ecp_group_free(&grp);
 
     return ret == 0 ? true : false;
 }
+

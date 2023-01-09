@@ -181,12 +181,9 @@ bool generate_ec_key(Buffer *pri_key, Buffer *pub_key)
 		mbedtls_mpi_write_binary(&pub_point.MBEDTLS_PRIVATE(X), pub_key->ptr, EC_POINT_SIZE );
 		mbedtls_mpi_write_binary(&pub_point.MBEDTLS_PRIVATE(Y), &pub_key->ptr[EC_POINT_SIZE ], EC_POINT_SIZE );
 
-		mbedtls_mpi_write_file( "Q(X): ", &pub_point.MBEDTLS_PRIVATE(X), 16, NULL );
-        mbedtls_mpi_write_file( "Q(Y): ", &pub_point.MBEDTLS_PRIVATE(Y), 16, NULL );
-		mbedtls_mpi_write_file( "Q(Z): ", &pub_point.MBEDTLS_PRIVATE(Z), 16, NULL );
 		uint8_t z[EC_POINT_SIZE] = {0};
 		mbedtls_mpi_write_binary(&pub_point.MBEDTLS_PRIVATE(Z), z, EC_POINT_SIZE );
-		print_hex("ecpoint_z", z, EC_POINT_SIZE);
+
 
 		result = true;
 	}

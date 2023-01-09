@@ -9,7 +9,7 @@
 
 #define TEST_ECDSA_PRIVATE_KEY_SIZE (32u)
 #define TEST_ECDSA_PUBLIC_KEY_SIZE (64u)
-#define TEST_SIGNATURE_SIZE (72u)
+#define TEST_SIGNATURE_SIZE (64)
 
 class SignatureEccTest : public testing::Test
 {
