@@ -149,7 +149,7 @@ bool generate_ec_cert(Buffer *pri_cert, Buffer *pub_cert)
 	return true;
 }
 
-static bool get_ec_public_key(EC_KEY* ec_key, Buffer *pub_key)
+static bool get_ec_public_key(const EC_KEY* ec_key, Buffer *pub_key)
 {
 	BN_CTX* ctx = BN_CTX_new();
 	const EC_GROUP *group = EC_KEY_get0_group(ec_key);
@@ -193,6 +193,50 @@ bool generate_ec_key(Buffer *pri_key, Buffer *pub_key)
     return result;
 }
 
+
+static EC_KEY* get_ec_private_key(const Buffer *key)
+{
+	BIGNUM* bn = BN_bin2bn(key->ptr, EC_POINT_SIZE, NULL);
+
+    EC_KEY* ec_key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+    const EC_GROUP* grp = EC_KEY_get0_group(ec_key);
+    BN_CTX* ctx = BN_CTX_new();
+
+    EC_POINT* pub_key = EC_POINT_new(grp);
+    EC_POINT_mul(grp, pub_key, bn, NULL, NULL, ctx);
+
+    EC_KEY_set_public_key(ec_key, pub_key);
+    EC_KEY_set_private_key(ec_key, bn);
+
+    EC_POINT_free(pub_key);
+    BN_CTX_free(ctx);
+
+    if(EC_KEY_check_key(ec_key) <= 0)
+    {
+        print_last_error("EC_KEY_check_key faield");
+        EC_KEY_free(ec_key);
+        ec_key = NULL;
+    }
+
+    return ec_key;
+}
+
+static EC_POINT* get_ec_point(const Buffer *key)
+{
+	BN_CTX* ctx = BN_CTX_new();
+	EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_X9_62_prime256v1);
+
+	BIGNUM *p_x = BN_bin2bn(key->ptr, EC_POINT_SIZE, NULL);
+    BIGNUM* p_y = BN_bin2bn(&key->ptr[EC_POINT_SIZE], EC_POINT_SIZE, NULL);
+
+	EC_POINT* public_key = EC_POINT_new(group);
+	EC_POINT_set_affine_coordinates(group, public_key, p_x, p_y, ctx);
+
+	BN_CTX_free(ctx);
+
+	return public_key;
+}
+
 bool export_ec_private_key_from_cert(const Buffer *cert, Buffer* key)
 {
 	EC_KEY* ec_key = NULL;
@@ -218,4 +262,26 @@ bool export_ec_public_key_from_cert(const Buffer *cert, Buffer* key)
 	BIO_free(bio);
 
 	return true;
+}
+
+bool generate_ecdh_key(const Buffer * pri_key, const Buffer* peer_pub_key, Buffer* key)
+{
+	bool result = true;
+	EC_KEY* ec_key = get_ec_private_key(pri_key );
+
+	int field_size = EC_GROUP_get_degree(EC_KEY_get0_group(ec_key));
+	key->size = (field_size + 7) / 8;
+
+	EC_POINT* pub_key = get_ec_point(peer_pub_key);
+	int ret = ECDH_compute_key(key->ptr, key->size, pub_key, ec_key, NULL);
+	if(ret <= 0)
+	{
+		result = false;
+	}
+	else
+	{
+		key->size = ret;
+	}
+
+	return result;
 }

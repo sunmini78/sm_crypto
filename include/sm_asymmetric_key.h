@@ -24,6 +24,8 @@ bool export_rsa_public_key_from_cert(const Buffer *cert, Buffer *mod_n, Buffer *
 bool export_ec_private_key_from_cert(const Buffer *cert, Buffer* key);
 bool export_ec_public_key_from_cert(const Buffer *cert, Buffer* key);
 
+bool generate_ecdh_key(const Buffer * pri_key, const Buffer* peer_pub_key, Buffer* key);
+
 # ifdef __cplusplus
 }
 # endif

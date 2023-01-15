@@ -2,11 +2,13 @@
 
 #include <string.h>
 
-#include "mbedtls/pk.h"
-#include "mbedtls/rsa.h"
-#include "mbedtls/ecp.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
+#include <mbedtls/pk.h>
+#include <mbedtls/rsa.h>
+#include <mbedtls/ecp.h>
+#include <mbedtls/ecdh.h>
+#include <mbedtls/entropy.h>
+#include <mbedtls/ctr_drbg.h>
+
 
 bool generate_rsa_key(const uint32_t key_bits, Buffer *pri_e, Buffer *mod_n, Buffer *pub_e)
 {
@@ -224,4 +226,14 @@ bool export_ec_public_key_from_cert(const Buffer *cert, Buffer* key)
 	mbedtls_pk_free(&ctx);
 
 	return ret == 0 ? true : false;
+}
+
+bool generate_ecdh_key(const Buffer * pri_key, const Buffer* peer_pub_key, Buffer* key)
+{
+	bool result = false;
+	mbedtls_ecdh_context ctx;
+	mbedtls_ecdh_init(&ctx);
+
+	mbedtls_ecdh_free(&ctx);
+	return result;
 }

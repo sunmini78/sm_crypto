@@ -6,6 +6,7 @@
 
 #define TEST_ECDSA_PRIVATE_KEY_SIZE (32u)
 #define TEST_ECDSA_PUBLIC_KEY_SIZE (64u)
+#define TEST_ECDH_KEY_SIZE (32u)
 #define TEST_SIGNATURE_SIZE (64u)
 
 #define TEST_RSA_KEY_SIZE (256u)
@@ -144,4 +145,41 @@ TEST_F(AsymmetricKeyTest, ECDSA_export_key)
 	print_hex("ECC Public Key", buf_pub.ptr, buf_pub.size);
 
 	ASSERT_EQ(result, true);
+}
+
+TEST_F(AsymmetricKeyTest, ECDH)
+{
+	uint8_t pri_key1[TEST_ECDSA_PRIVATE_KEY_SIZE] = { 0 };
+    uint8_t pub_key1[TEST_ECDSA_PUBLIC_KEY_SIZE] = { 0 };
+	uint8_t pri_key2[TEST_ECDSA_PRIVATE_KEY_SIZE] = { 0 };
+    uint8_t pub_key2[TEST_ECDSA_PUBLIC_KEY_SIZE] = { 0 };
+
+	Buffer buf_pri1 = {.ptr = pri_key1, .size = sizeof(pri_key1)};
+    Buffer buf_pub1 = {.ptr = pub_key1, .size = sizeof(pub_key1)};
+
+	Buffer buf_pri2 = {.ptr = pri_key2, .size = sizeof(pri_key2)};
+    Buffer buf_pub2 = {.ptr = pub_key2, .size = sizeof(pub_key2)};
+
+	bool result = generate_ec_key(&buf_pri1, &buf_pub1);
+	ASSERT_EQ(result, true);
+
+	result = generate_ec_key(&buf_pri2, &buf_pub2);
+	ASSERT_EQ(result, true);
+
+	uint8_t key1[TEST_ECDH_KEY_SIZE] = { 0 };
+	Buffer buf_key1 = {.ptr = key1, .size = sizeof(key1)};
+
+	result = generate_ecdh_key(&buf_pri1, &buf_pub2, &buf_key1);
+	ASSERT_EQ(result, true);
+	print_hex("ECDH key1", buf_key1.ptr, buf_key1.size);
+
+	uint8_t key2[TEST_ECDH_KEY_SIZE] = { 0 };
+	Buffer buf_key2 = {.ptr = key2, .size = sizeof(key2)};
+
+	result = generate_ecdh_key(&buf_pri2, &buf_pub1, &buf_key2);
+	ASSERT_EQ(result, true);
+	print_hex("ECDH key2", buf_key2.ptr, buf_key2.size);
+
+
+	ASSERT_EQ(memcmp(buf_key1.ptr, buf_key2.ptr, buf_key1.size), 0);
 }
