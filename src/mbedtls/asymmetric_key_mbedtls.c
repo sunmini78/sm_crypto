@@ -230,10 +230,37 @@ bool export_ec_public_key_from_cert(const Buffer *cert, Buffer* key)
 
 bool generate_ecdh_key(const Buffer * pri_key, const Buffer* peer_pub_key, Buffer* key)
 {
-	bool result = false;
+	const char *pers = "ec_dh_key";
 	mbedtls_ecdh_context ctx;
 	mbedtls_ecdh_init(&ctx);
+	mbedtls_ecdh_setup(&ctx, MBEDTLS_ECP_DP_SECP256R1);
+
+	mbedtls_ecp_keypair ourkey, peerkey;
+	mbedtls_ecp_keypair_init(&ourkey);
+	mbedtls_ecp_read_key(MBEDTLS_ECP_DP_SECP256R1, &ourkey, pri_key->ptr, pri_key->size);
+	mbedtls_ecdh_get_params(&ctx, &ourkey, MBEDTLS_ECDH_OURS); // read private & public key
+
+	mbedtls_ecp_keypair_init(&peerkey);
+	mbedtls_ecp_group_load(&peerkey.MBEDTLS_PRIVATE(grp), MBEDTLS_ECP_DP_SECP256R1);
+	mbedtls_mpi_read_binary(&peerkey.MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(X), peer_pub_key->ptr, EC_POINT_SIZE);
+	mbedtls_mpi_read_binary(&peerkey.MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Y), &peer_pub_key->ptr[EC_POINT_SIZE], EC_POINT_SIZE);
+	uint8_t point_z = 0x01;
+	mbedtls_mpi_read_binary(&peerkey.MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Z), &point_z, 1);
+
+	mbedtls_ecdh_get_params(&ctx, &peerkey, MBEDTLS_ECDH_THEIRS); // read public key only
+
+
+	mbedtls_entropy_context entropy;
+	mbedtls_entropy_init(&entropy);
+
+	mbedtls_ctr_drbg_context ctr_drbg;
+	mbedtls_ctr_drbg_init(&ctr_drbg);
+	mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, (const unsigned char *) pers, strlen(pers));
+
+	int ret = mbedtls_ecdh_calc_secret(&ctx, &key->size, key->ptr, key->size, mbedtls_ctr_drbg_random, &ctr_drbg);
 
 	mbedtls_ecdh_free(&ctx);
-	return result;
+	mbedtls_ecp_keypair_free(&ourkey);
+	mbedtls_ecp_keypair_free(&peerkey);
+	return ret == 0 ? true : false;
 }
