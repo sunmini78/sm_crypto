@@ -128,7 +128,7 @@ static bool openssl_rsa_sign(RSA *rsa, const EVP_MD *ed, int pad, const Buffer *
 	return result;
 }
 
-static bool openssl_rsa_verify(RSA *rsa, const EVP_MD *ed, int pad, const Buffer *digest, const Buffer *sig)
+static bool rsa_verify(RSA *rsa, const EVP_MD *ed, int pad, const Buffer *digest, const Buffer *sig)
 {
     bool result = true;
 
@@ -176,7 +176,7 @@ bool rsa_pkcs1_verify(const Buffer *pub_key, const Buffer *modN, const Buffer *m
     uint8_t digest[DIGEST_SHA512_SIZE] = {0};
     Buffer buf_digest = {.ptr = digest, .size = digest_size};
 	generate_sha(message, &buf_digest);
-	bool result = openssl_rsa_verify(rsa, get_sha_method(digest_size), RSA_PKCS1_PADDING, &buf_digest, sig);
+	bool result = rsa_verify(rsa, get_sha_method(digest_size), RSA_PKCS1_PADDING, &buf_digest, sig);
     RSA_free(rsa);
 
     return result;
@@ -204,7 +204,7 @@ bool rsa_pss_verify(const Buffer *pub_key, const Buffer *modN, const Buffer *mes
     Buffer buf_digest = {.ptr = digest, .size = digest_size};
 	generate_sha(message, &buf_digest);
 
-	bool result = openssl_rsa_verify(rsa, get_sha_method(digest_size), RSA_PKCS1_PSS_PADDING, &buf_digest, sig);
+	bool result = rsa_verify(rsa, get_sha_method(digest_size), RSA_PKCS1_PSS_PADDING, &buf_digest, sig);
     RSA_free(rsa);
 
     return result;
