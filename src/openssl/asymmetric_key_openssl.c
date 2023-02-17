@@ -283,5 +283,8 @@ bool generate_ecdh_key(const Buffer * pri_key, const Buffer* peer_pub_key, Buffe
 		key->size = ret;
 	}
 
+	EC_KEY_free(ec_key);
+	EC_POINT_free(pub_key);
+
 	return result;
 }
