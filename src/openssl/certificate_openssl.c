@@ -6,19 +6,28 @@
 #include <openssl/pem.h>
 
 
-static X509* get_x509(const Buffer* cert)
+static X509* get_x509(const Buffer* cert, cert_type_t type)
 {
+    X509* x509 = NULL;
     BIO* bio = BIO_new_mem_buf(cert->ptr, cert->size);
-    X509* x509 = PEM_read_bio_X509(bio, NULL, NULL, NULL);
+    if(type == CERT_TYPE_PEM)
+    {
+
+        x509 = PEM_read_bio_X509(bio, NULL, NULL, NULL);
+    }
+    else
+    {
+        x509 = d2i_X509_bio(bio, NULL);
+    }
 
     BIO_free(bio);
 
     return x509;
 }
 
-bool verify_certificate(const Buffer* cert)
+bool verify_certificate(const Buffer* cert, cert_type_t type)
 {
-    X509* x509 = get_x509(cert);
+    X509* x509 = get_x509(cert, type);
     EVP_PKEY* pkey = X509_get_pubkey(x509);
     int ret = X509_verify(x509, pkey);
     EVP_PKEY_free(pkey);
@@ -46,9 +55,9 @@ static bool get_ec_public_key(const EC_KEY* ec_key, Buffer* pub_key)
     return true;
 }
 
-bool get_public_key_from_certificate(const Buffer* cert, Buffer* key)
+bool get_public_key_from_certificate(const Buffer* cert, cert_type_t type, Buffer* key)
 {
-    X509* x509 = get_x509(cert);
+    X509* x509 = get_x509(cert, type);
     EVP_PKEY* pkey = X509_get_pubkey(x509);
     int32_t key_type = EVP_PKEY_id(pkey);
     switch (key_type)
@@ -90,10 +99,10 @@ bool get_ec_signature(const ASN1_BIT_STRING* ans_sig,  Buffer* signature)
     return true;
 }
 
-bool get_signature_from_certificate(const Buffer* cert, Buffer* signature)
+bool get_signature_from_certificate(const Buffer* cert, cert_type_t type, Buffer* signature)
 {
     bool result = true;
-    X509* x509 = get_x509(cert);
+    X509* x509 = get_x509(cert, type);
     const ASN1_BIT_STRING* asnSignature;
     const X509_ALGOR* palg;
     X509_get0_signature(&asnSignature, &palg, x509);
